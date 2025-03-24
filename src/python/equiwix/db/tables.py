@@ -13,14 +13,20 @@ class IndexConstituents(Base):
 
     date: Mapped[str] = mapped_column(Text, primary_key=True)
     ticker: Mapped[str] = mapped_column(String(20), primary_key=True)
+    source: Mapped[str] = mapped_column(String(20), primary_key=True)
 
 
 class IndexLevel(Base):
     __tablename__ = 'index_level'
 
     datetime_utc: Mapped[str] = mapped_column(Text, primary_key=True)
-    divisor: Mapped[float] = mapped_column(REAL)
-    level: Mapped[Optional[float]] = mapped_column(REAL)
+    time_interval: Mapped[str] = mapped_column(String(10), primary_key=True)
+    open: Mapped[Optional[float]] = mapped_column(REAL)
+    high: Mapped[Optional[float]] = mapped_column(REAL)
+    low: Mapped[Optional[float]] = mapped_column(REAL)
+    close: Mapped[Optional[float]] = mapped_column(REAL)
+    num_constituents: Mapped[int] = mapped_column(Integer)
+    source: Mapped[str] = mapped_column(String(20), primary_key=True)
 
 
 class YFinanceTickerData(Base):

@@ -4,12 +4,12 @@ from datetime import timedelta
 import pandas as pd
 import yfinance as yf
 
-from ..base_sync import DataSync
+from ..base_sync import DataFrameSync
 from ..db.tables import YFinanceTickerData
 from ..ticker_univ import TickerUniv
 
 
-class YFinanceDataSync(DataSync):
+class YFinanceDataSync(DataFrameSync):
     @property
     def table(self):
         return YFinanceTickerData
