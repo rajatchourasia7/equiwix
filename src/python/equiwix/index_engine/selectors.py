@@ -108,7 +108,7 @@ class IndexConstituentsDateSelector(BaseDateSelector):
         df = fetch_query_results(session, qry)
         session.close()
 
-        return df.groupby("date")["ticker"].apply(list).reset_index()
+        return df.groupby("date")["ticker"].apply(list)
 
 
 class IndexLevelDateSelector(BaseDateSelector):
@@ -135,7 +135,7 @@ class IndexLevelDateSelector(BaseDateSelector):
         df["datetime_ny"] = (
             df["datetime_utc"].dt.tz_localize("UTC").dt.tz_convert("America/New_York")
         )
-        df["date"] = df["datetime_ny"].dt.date
+        df["date"] = df["datetime_ny"].dt.normalize()
 
         df = df.sort_values("datetime_ny").drop_duplicates("date", keep="last")
         return df.set_index("date").drop(columns=["datetime_utc", "datetime_ny"])
