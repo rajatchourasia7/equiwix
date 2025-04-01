@@ -13,10 +13,11 @@ def create_db(db_path=None):
     conn.close()
 
 
-def create_tables(db_uri=None):
+def create_tables(tables=None, db_uri=None):
     """Create all the tables defined in tables.py if they don't exist."""
     engine = get_engine(db_uri)
-    Base.metadata.create_all(engine)
+    tables = [tbl_klass.__table__ for tbl_klass in tables] if tables is not None else None
+    Base.metadata.create_all(engine, tables=tables)
 
 
 def create_db_and_tables():

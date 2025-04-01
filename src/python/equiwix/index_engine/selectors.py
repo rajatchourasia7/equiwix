@@ -20,6 +20,7 @@ from datetime import date, datetime
 
 import pandas as pd
 import pandas_market_calendars as mcal
+from sqlalchemy import func as F
 from sqlalchemy.orm import Session
 
 from ..db import fetch_query_results, get_session
@@ -87,6 +88,28 @@ class BaseDateSelector(BaseSelector):
     def time_interval(self):
         return '1day'
 
+    @property
+    @abstractmethod
+    def date_col(self):
+        pass
+
+    def _get_date_col_min_max(self, metric):
+        if metric not in ('min', 'max'):
+            raise ValueError('Only min/max metric value supported.')
+
+        session = get_session()
+        qry = session.query(F.date(getattr(F, metric)(self.date_col)).label('date'))
+        res = fetch_query_results(session, qry)
+        return None if len(res) == 0 else res.date.iloc[0]
+
+    @property
+    def first_date(self):
+        return self._get_date_col_min_max('min')
+
+    @property
+    def last_date(self):
+        return self._get_date_col_min_max('max')
+
     @abstractmethod
     def select(self, date=None):
         pass
@@ -95,15 +118,24 @@ class BaseDateSelector(BaseSelector):
 class IndexConstituentsDateSelector(BaseDateSelector):
     """Selector for index constituents based on date."""
 
+    @property
+    def src_tbl(self):
+        return IndexConstituents
+
+    @property
+    def date_col(self):
+        return self.src_tbl.date
+
     @standardize_date_arg
     def select(self, date=None):
         """Fetch tickers for the given date(s)."""
-        tbl = IndexConstituents
         session = get_session()
 
-        qry = session.query(tbl.date, tbl.ticker).filter(tbl.source == self.source)
+        qry = session.query(self.src_tbl.date, self.src_tbl.ticker).filter(
+            self.src_tbl.source == self.source
+        )
         if date is not None:
-            qry = qry.filter(tbl.date.in_(date.tolist()))
+            qry = qry.filter(self.src_tbl.date.in_(date.tolist()))
 
         df = fetch_query_results(session, qry)
         session.close()
@@ -114,18 +146,32 @@ class IndexConstituentsDateSelector(BaseDateSelector):
 class IndexLevelDateSelector(BaseDateSelector):
     """Selector for index levels on a daily basis, converting UTC to NY time and filtering."""
 
+    @property
+    def src_tbl(self):
+        return IndexLevel
+
+    @property
+    def date_col(self):
+        return self.src_tbl.datetime_utc
+
     @standardize_date_arg
     def select(self, date=None):
         """Fetch index levels for the given date(s)."""
-        tbl = IndexLevel
         session = get_session()
 
         qry = session.query(
-            tbl.datetime_utc, tbl.open, tbl.high, tbl.low, tbl.close, tbl.num_constituents
-        ).filter(tbl.source == self.source, tbl.time_interval == self.time_interval)
+            self.src_tbl.datetime_utc,
+            self.src_tbl.open,
+            self.src_tbl.high,
+            self.src_tbl.low,
+            self.src_tbl.close,
+            self.src_tbl.num_constituents,
+        ).filter(
+            self.src_tbl.source == self.source, self.src_tbl.time_interval == self.time_interval
+        )
 
         if date is not None:
-            qry = qry.filter(tbl.datetime_utc.between(date.min(), date.max()))
+            qry = qry.filter(F.date(self.src_tbl.datetime_utc).between(date.min(), date.max()))
 
         df = fetch_query_results(session, qry)
         session.close()

@@ -1,5 +1,8 @@
 import os
 import subprocess
+from datetime import date
+
+from dateutil.parser import parse
 
 
 def get_equiwix_home():
@@ -15,3 +18,25 @@ def get_equiwix_home():
         return output
     except subprocess.CalledProcessError:
         raise RuntimeError("Not inside a Git repository or Git is not installed")
+
+
+class Date(date):
+    def __new__(cls, *args):
+        if len(args) == 1:
+            d = args[0]
+
+            if isinstance(d, int):
+                d = str(d)
+
+            if isinstance(d, str):
+                d = parse(d, dayfirst=False).date()
+
+            return super().__new__(cls, d.year, d.month, d.day)
+
+        return super().__new__(cls, *args)
+
+
+EQUIWIX_END_OF_TIME = Date(20991231)
+
+# Index starts from price 100
+EQUIWIX_OPENING_LEVEL = 100.0

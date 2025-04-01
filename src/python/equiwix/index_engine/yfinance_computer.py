@@ -2,6 +2,7 @@
 Module to compute index constituents and index levels using yfinance dataset
 and sync to the respective tables.
 """
+
 from sqlalchemy import desc
 from sqlalchemy import func as F
 from sqlalchemy import literal, select
@@ -9,12 +10,7 @@ from sqlalchemy import literal, select
 from ..base_sync import SelectQuerySync
 from ..db.tables import IndexConstituents, IndexLevel, YFinanceTickerData
 from .constants import NUM_STOCKS_IN_INDEX
-
-# Requirements:
-# YFinanceIndexConstituentsComputer().sync()
-# YFinanceIndexLevelsComputer().sync()
-# IndexConstituentsSelector(source='yfinance').select(start_date, end_date=None)
-# IndexLevelsSelector(source='yfinance_alpha_vantage').select(start_datetime, end_datetime=None, interval=None)
+from .divisor import IndexLevelDivisorDAO
 
 
 class YFinanceIndexConstituentsComputer(SelectQuerySync):
@@ -116,13 +112,15 @@ class YFinanceIndexLevelComputer(SelectQuerySync):
 
         ticker_count = F.count(F.distinct(price_src_tbl.ticker))
 
+        idx_divisor = IndexLevelDivisorDAO(source=self.source).get(self.sync_end_date)
+
         # Select statement
         stmt = (
             select(
                 price_src_tbl.datetime_utc,
                 literal(self.time_interval).label("time_interval"),
                 *[
-                    (F.sum(getattr(price_src_tbl, level_type)) / ticker_count).label(level_type)
+                    (F.sum(1 / getattr(price_src_tbl, level_type)) / idx_divisor).label(level_type)
                     for level_type in ('open', 'high', 'low', 'close')
                 ],
                 ticker_count.label("num_constituents"),

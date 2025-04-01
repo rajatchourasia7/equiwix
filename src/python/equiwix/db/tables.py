@@ -29,6 +29,15 @@ class IndexLevel(Base):
     source: Mapped[str] = mapped_column(String(20), primary_key=True)
 
 
+class IndexLevelDivisor(Base):
+    __tablename__ = 'index_level_divisor'
+
+    source: Mapped[str] = mapped_column(String(20), primary_key=True)
+    knowledge_start_date: Mapped[str] = mapped_column(Text, primary_key=True)
+    knowledge_end_date: Mapped[str] = mapped_column(Text)
+    divisor: Mapped[Optional[float]] = mapped_column(REAL)
+
+
 class YFinanceTickerData(Base):
     __tablename__ = 'yfinance_ticker_data'
 
