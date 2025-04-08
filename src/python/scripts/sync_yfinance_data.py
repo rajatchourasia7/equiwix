@@ -58,7 +58,3 @@ def main():
         YFinanceIndexLevelComputer(run_date=args.date, sync_start_date=sync_start_date).sync()
     else:
         raise ValueError(f'Unknown action {args.action}')
-
-
-if __name__ == "__main__":
-    main()
