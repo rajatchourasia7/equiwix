@@ -7,6 +7,9 @@ import yfinance as yf
 from ..base_sync import DataFrameSync
 from ..db.tables import YFinanceTickerData
 from ..ticker_univ import TickerUniv
+from ..util import Date
+
+YFINANCE_START_OF_TIME = Date('2023-07-01')
 
 
 class YFinanceDataSync(DataFrameSync):

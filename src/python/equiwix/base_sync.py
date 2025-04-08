@@ -1,10 +1,10 @@
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
 
 from sqlalchemy import insert
 
 from .db import atomic_session
+from .util import Date
 
 
 class BaseSync(ABC):
@@ -19,8 +19,8 @@ class BaseSync(ABC):
         if sync_start_date is None:
             sync_start_date = run_date
 
-        self.sync_start_date = datetime.strptime(sync_start_date, '%Y%m%d').date()
-        self.sync_end_date = datetime.strptime(run_date, '%Y%m%d').date()
+        self.sync_start_date = Date(sync_start_date)
+        self.sync_end_date = Date(run_date)
 
         if self.sync_start_date > self.sync_end_date:
             raise ValueError(f'sync_start_date should be <= run_date.')

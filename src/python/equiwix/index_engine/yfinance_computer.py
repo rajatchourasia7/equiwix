@@ -49,8 +49,8 @@ class YFinanceIndexConstituentsComputer(SelectQuerySync):
                 .label("recent_rank"),
             )
             .where(
-                (F.date(src_tbl.datetime_utc) >= self.sync_start_date)
-                & (F.date(src_tbl.datetime_utc) <= self.sync_end_date)
+                (F.date(src_tbl.datetime_utc) >= str(self.sync_start_date))
+                & (F.date(src_tbl.datetime_utc) <= str(self.sync_end_date))
             )
             .cte("latest_per_day_data")
         )
@@ -128,8 +128,8 @@ class YFinanceIndexLevelComputer(SelectQuerySync):
             )
             .where(
                 *join_condition,
-                F.date(price_src_tbl.datetime_utc) >= self.sync_start_date,
-                F.date(price_src_tbl.datetime_utc) <= self.sync_end_date,
+                F.date(price_src_tbl.datetime_utc) >= str(self.sync_start_date),
+                F.date(price_src_tbl.datetime_utc) <= str(self.sync_end_date),
             )
             .group_by(price_src_tbl.datetime_utc)
         )
