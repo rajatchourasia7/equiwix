@@ -13,6 +13,8 @@ Equiwix is a dashboard that tracks and visualizes the performance of an equal-we
   - Index constituents on the selected day.
   - Aggregated metrics (Cumulative return, max daily change, number of composition changes) for the selected date-range.
 
+  ![Dashboard Demo](assets/equiwix_dashboard_demo.gif)
+
 ## Setup Instructions
 
   Follow these steps to set up and run the Equiwix project:
