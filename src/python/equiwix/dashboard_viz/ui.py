@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 
-import pandas as pd
+import plotly.express as px
 import plotly.graph_objs as go
 import streamlit as st
 
+from ..util import Date
 from .data_fetcher import DataFetcher
 from .metrics import compute_index_metrics, detect_composition_changes
 
@@ -25,8 +26,8 @@ def render_date_selector():
     date_range = st.sidebar.date_input(
         "Select Date Range",
         value=(default_start, today),
-        min_value=today - timedelta(days=730),
-        max_value=today,
+        min_value=Date(19000101),
+        max_value=Date(21991231),
     )
     return date_range
 
@@ -41,54 +42,39 @@ def load_data(start_date, end_date):
     return index_df, constituents_df, change_dates
 
 
-def add_composition_change_lines(fig, index_df, change_dates):
-    for change_date in change_dates:
-        change_date_dt = pd.to_datetime(change_date).to_pydatetime()
-
-        fig.add_trace(
-            go.Scatter(
-                x=[change_date_dt, change_date_dt],
-                y=[index_df["close"].min(), index_df["close"].max()],
-                mode="lines",
-                line=dict(color="red", dash="dash"),
-            )
-        )
-
-        fig.add_annotation(
-            x=change_date_dt,
-            y=index_df["close"].max(),
-            text="Change",
-            showarrow=True,
-            arrowhead=1,
-            ax=0,
-            ay=-40,
-            font=dict(color="red"),
-        )
-
-
 def render_performance_chart(index_df, change_dates):
     st.subheader("📊 Index Performance")
-    import plotly.graph_objs as go
 
-    fig = go.Figure()
+    # Create the line chart representing the index levels
+    fig = px.line(index_df['close'], title='Index levels')
+
+    # Customize hover information
+    fig.update_traces(mode='lines', hovertemplate='Date: %{x}<br>Close: %{y:.2f}<extra></extra>')
+
+    fig.update_layout(xaxis_title='Date', yaxis_title='Close')
+
+    # Add vertical lines for composition changes
+    # compute a constant y-position just below the data
+    ymin, ymax = index_df['close'].min(), index_df['close'].max()
+    baseline = ymin - (ymax - ymin) * 0.02
+
     fig.add_trace(
         go.Scatter(
-            x=index_df.index,
-            y=index_df["close"],
-            mode="lines+markers",
-            name="Close",
-            line=dict(color="royalblue"),
+            x=change_dates,
+            y=[baseline] * len(change_dates),
+            mode='markers',
+            marker=dict(
+                symbol='line-ns-open',  # vertical tick
+                size=8,  # very small
+                color='grey',
+                line_width=1,
+            ),
+            hovertemplate='Date: %{x|%Y-%m-%d}<extra></extra>',
+            name='Composition change',
         )
     )
 
-    add_composition_change_lines(fig, index_df, change_dates)
-
-    fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Index Close",
-        hovermode="x unified",
-    )
-
+    # Show the plot in Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -102,9 +88,22 @@ def render_composition_view(constituents_df):
     )
 
     try:
-        tickers = constituents_df.loc[selected_date.strftime("%Y-%m-%d")]
         st.write(f"**Constituents on {selected_date}:**")
-        st.write(tickers)
+
+        tickers = constituents_df.loc[selected_date.strftime("%Y-%m-%d")]
+        tickers_html = f"""
+                <div style="
+                    border: 2px solid royalblue;
+                    padding: 10px;
+                    border-radius: 10px;
+                    background-color: #f0f0f0;
+                    font-family: Arial;
+                ">
+                    {', '.join(tickers)}
+                </div>
+            """
+        st.markdown(tickers_html, unsafe_allow_html=True)
+
     except KeyError:
         st.warning(f"No composition data available for {selected_date}.")
 
