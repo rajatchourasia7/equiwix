@@ -78,3 +78,7 @@ Equiwix is a dashboard that tracks and visualizes the performance of an equal-we
   This will launch the dashboard locally and provide a link. Copy-paste that link in the browser.
 
   You are now ready to use Equiwix to track and visualize the performance of the equal-weighted index!
+
+## Contact
+
+For questions or contributions, please contact [@rajatchourasia7](https://github.com/rajatchourasia7).
