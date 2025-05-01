@@ -14,12 +14,12 @@ class TickerUniv:
     def table(self):
         return TickerUniverse
 
-    def add(self, ticker):
-        data_dict = [{'univ': self.univ, 'ticker': ticker}]
+    def add(self, tickers):
+        data_dict = [{'univ': self.univ, 'ticker': ticker} for ticker in tickers]
         with atomic_session() as session:
             session.execute(insert(self.table), data_dict)
 
-        logging.info(f'Added {ticker} to the {self.univ} universe.')
+        logging.info(f'Added {tickers} to the {self.univ} universe.')
 
     def get_tickers(self, all_univ=False):
         session = get_session()
