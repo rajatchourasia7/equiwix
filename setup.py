@@ -16,8 +16,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "equiwix-run_dashboard = scripts.run_dashboard:main",
             "equiwix-sync_yfinance_data = scripts.sync_yfinance_data:main",
+            "equiwix-launch_dashboard = scripts.launch_dashboard:main",
         ],
     },
+    include_package_data=True,
 )
