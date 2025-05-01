@@ -4,13 +4,16 @@ Equiwix is a dashboard that tracks and visualizes the performance of an equal-we
 
 ## Features
 - **Index Construction & Rebalancing**
-
   - Fetches the daily price data and number of outstansing shares data from yfinance dataset.
-  - Tracks the top 100 US stocks based on daily closing market cap.
+  - Tracks the top 100 US stocks based on daily closing market cap and shares outstanding.
   - Ensures equal-weighted distribution, rebalancing at market close.
   - Stocks exiting the top 100 are replaced the next trading day.
+- **Dashboard to visualize**
+  - Change in index levels per day for the selected date-range with days marked where index constituents have changed.
+  - Index constituents on the selected day.
+  - Aggregated metrics (Cumulative return, max daily change, number of composition changes) for the selected date-range.
 
-  ## Setup Instructions
+## Setup Instructions
 
   Follow these steps to set up and run the Equiwix project:
 
